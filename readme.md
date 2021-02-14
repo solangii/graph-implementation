@@ -3,6 +3,8 @@
 Meta Continual learning을 위한 graph implemetation repository
 
 - FSCIL Repository : https://github.com/xyutao/fscil
+- Neural Gas Paper : http://ftp.ks.uiuc.edu/Publications/Papers/PDF/MART91B/MART91B.pdf
+- Graph 작동 방식 이해하기 : https://www.notion.so/Graph-1ef65d4d6f084b7380345a8ce0f5053b
 
 
 
