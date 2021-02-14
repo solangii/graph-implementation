@@ -15,6 +15,7 @@ Meta Continual learning을 위한 graph implemetation repository
 - [ ] GPU 연산으로 바꾸기  (+ z,c error 고치기)
 - [ ] Accuracy 측정 function 만들기 (for hyperparameter-tuning)
 - [ ] Base Graph Module화
+- [ ] @hmcoo // feature set load file 
 
 
 
