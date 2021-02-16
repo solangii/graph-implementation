@@ -1,11 +1,15 @@
 import numpy as np
-import random
+from tqdm import tqdm
+import os
 from scipy.spatial import distance
+from numpy.linalg import norm
+from cupy.linalg import norm as norm_gpu
 
 #Todo gpu연산으로 바꾸고
 #Todo ACCURACY 측정하는거 추가하고
 #Todo 중간 파라미터 저장할 수 있는
-#Todo vertex 클래스 만들
+
+#Todo 후에 Argument는 parser
 
 class Vertex():
     def __init__(self, m):
@@ -15,9 +19,9 @@ class Vertex():
         self.m = m
         self.f_idx = []
 
-
 class ng:
-    def __init__(self, feature_set, vertex_nums=1200, alpha = 10, eta = 0.1, max_iter = 100):
+    def __init__(self, feature_set, gpu, vertex_nums=1200, alpha = 10, eta = 0.1, max_iter = 100):
+        self.xp = None
         self.feature_set = feature_set
         self.feature_nums = self.feature_set.shape[0]
         self.vertex_nums = vertex_nums
@@ -26,6 +30,16 @@ class ng:
         self.max_iter = max_iter
         self.anchor_set = self.init_anchor()
         self.vertices = []
+        self.gpu = gpu
+
+        if self.gpu <0:
+            self.xp = np
+        else:
+            import cupy as cp
+            self.xp = cp
+
+            os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+            os.environ["CUDA_VISIBLE_DEVICES"] = "%d" % self.gpu
 
     def init_anchor(self):
         """
@@ -40,7 +54,7 @@ class ng:
         """
         compute distance with feature and m, and ordering it
         :param feature: each feature
-        :return: rank index for feature
+        :return: rank order index for feature
         """
         Df = []
 
@@ -67,7 +81,7 @@ class ng:
         """
         update all anchor
         """
-        for i in range(self.feature_nums):
+        for i in tqdm(range(self.feature_nums), desc="update anchor"):
             f = self.feature_set[i]
             Rf = self.compute_rank_order(f) #해당 feature와 가까운 순서대로 m의 index
 
@@ -75,8 +89,6 @@ class ng:
                 idx = Rf[j]
                 m = self.anchor_set[idx]
                 self.update_anchor(f,m,j,idx)
-
-            print("update m about", i,"th feature")
 
     def make_vertex(self):
         """
@@ -86,39 +98,63 @@ class ng:
             self.vertices.append(Vertex(self.anchor_set[i]))
 
     def update_vertex(self, image_set, label_set):
-        #모든 feature set 에 대해서 Rf 계산한거 저장해둬야겟다.
+        """
+        :param image_set:
+        :param label_set:
+        :return: vertex update
+        """
         for i in range(self.feature_nums):
             nearest_m = self.compute_rank_order(self.feature_set[i])[0]
             self.vertices[nearest_m].f_idx.append(i)
 
-        for i in range(self.vertex_nums):
+        for i in tqdm(range(self.vertex_nums), desc="making vertex : "):
             f_set = []
             for j in range(len(self.vertices[i].f_idx)):
                 f_set.append(self.feature_set[self.vertices[i].f_idx[j]])
 
-            self.vertices[i].l = self.compute_lambda(f_set)
-            self.vertices[i].z, self.vertices[i].c = self.compute_nearest(i, f_set, image_set, label_set)
+            f_set = self.xp.array(f_set)
 
+            ##예외처리, F_set이 비어있
+            if len(f_set)==0:
+                self.vertices[i].l = -1
+                self.vertices[i].z = -1
+                self.vertices[i].c = -1
+            else:
+                self.vertices[i].l = self.compute_lambda(f_set)
+                self.vertices[i].z, self.vertices[i].c = self.compute_nearest(i, f_set, image_set, label_set)
 
     def compute_lambda(self, f_set):
-        var = np.diag(np.cov(np.transpose(f_set),f_set))
-        lam = np.diag(var)
+        """
+        :param f_set:
+        :return: compute variance for winner vectors
+        """
+        cov = self.xp.cov(self.xp.transpose(f_set))
+        var = self.xp.diag(cov)
+        lam = self.xp.diag(var)
         return lam
 
     def compute_nearest(self, m_idx, f_set, image_set, label_set):
-        dist = distance.euclidean(self.vertices[m_idx].m,f_set[0])
+        """
+        :param m_idx: vertex index
+        :param f_set: nearest feature set
+        :param image_set: image set
+        :param label_set: label set
+        :return: 모든 Vertex에 대해서 가장 가까운 pseudo image와 label을 찾음
+        """
+        #dist = distance.euclidean(self.vertices[m_idx].m, f_set[0].T)
+        dist = norm(self.vertices[m_idx].m - f_set[0])
         idx = 0
         for i in range(1,len(f_set)):
-            if dist > distance.euclidean(self.vertices[m_idx].m,f_set[i]):
-                dist = distance.euclidean(self.vertices[m_idx].m,f_set[i])
+            if dist > norm(self.vertices[m_idx].m - f_set[i]):
+                dist = norm(self.vertices[m_idx].m - f_set[i])
                 idx = i
 
-        real_idx = self.vertices[m_idx].f_set[idx]
+        #real_idx = self.vertices[m_idx].f_set[idx]
+        real_idx = self.vertices[m_idx].f_idx[idx]
 
         z = image_set[real_idx]
         c = label_set[real_idx]
         return z, c
-
 
     def pretrain(self, x,y):
         """
@@ -127,23 +163,12 @@ class ng:
         :return:
         """
         self.update_anchor_set()
-        print("m update done!")
+        print("anchor update done!")
         print("============================================================")
 
         self.make_vertex()
-        print("make node done!")
-        print("============================================================")
+        print("make vertex done!")
 
         self.update_vertex(x,y)
-        print("update node done!")
+        print("update vertex done!")
         print("============================================================")
-
-
-
-
-
-
-
-
-
-
