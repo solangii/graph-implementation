@@ -10,14 +10,13 @@ Meta Continual learning을 위한 graph implemetation repository
 
 ## Todo
 
-20.02.16.화
-
-- [x] z, c, lambda error 
-
-- [x] GPU 연산으로 바꾸기  
+- [x] `210216 done` z, c, lambda error 
+- [x] `210216 done` GPU 연산으로 바꾸기  
 - [ ] Accuracy 측정 function 만들기 (for hyperparameter-tuning)
 - [ ] Base Graph Module화
 - [ ] @hmcoo // feature set load file 
+- [ ] m update for incremental phase 일단 식3 방식으로 implement 해보기
+- [ ] gpu number 지정 옵션추가?
 
 
 

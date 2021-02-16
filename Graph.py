@@ -9,7 +9,6 @@ from tqdm import tqdm
 
 #Todo ACCURACY 측정하는거 추가하고
 #Todo 중간 파라미터 저장할 수 있는
-
 #Todo 후에 Argument는 parser
 
 class Vertex():
@@ -113,7 +112,7 @@ class ng:
         :return: vertex update
         """
 
-        for i in range(self.feature_nums):
+        for i in tqdm(range(self.feature_nums), desc="winner vector compute"):
             nearest_m = self.compute_rank_order(self.feature_set[i])[0]
             self.vertices[nearest_m].f_idx.append(i)
 
@@ -187,5 +186,39 @@ class ng:
         self.update_vertex(x,y)
         print("update vertex done!")
         print("============================================================")
+
+
+    def compute_accuracy(self, f_set, label_set):
+        """
+        compute accuracy for hyper parameter.
+        해당 Feature와 winner vertex의 label이 일치한지 계산
+
+        :param f_set: feature set in th same class configuration with pretrained dataset. However, that were not used for pretrain
+        :param label_set: feature set's label
+        :return: success rate
+        """
+        print("compute accuracy for hyper-parameter!!")
+
+        success = 0
+
+        if self.xp is np:
+            comp = norm
+        else:
+            comp = norm_gpu
+
+        for i in tqdm(range(len(f_set)),desc="feature"):
+            dist = comp(self.vertices[0].m - f_set[i])
+            idx = 0
+            for m_idx in range(1,self.vertex_nums):
+                if dist > comp(self.vertices[m_idx].m - f_set[i]):
+                    dist = comp(self.vertices[m_idx].m - f_set[i])
+                    idx = i
+
+            if idx == label_set[i]:
+                success += 1
+
+        success_rate = float(success / len(f_set) )* 100
+
+        print("the accuracy is %d percent" %success_rate)
 
 
