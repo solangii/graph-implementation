@@ -12,11 +12,11 @@ Meta Continual learning을 위한 graph implemetation repository
 
 - [x] `210216 done` z, c, lambda error 
 - [x] `210216 done` GPU 연산으로 바꾸기  
-- [x] `210206 done` Accuracy 측정 function 만들기 (for hyperparameter-tuning)
-- [ ] Base Graph Module화
-- [ ] @hmcoo // feature set load file 
-- [ ] m update for incremental phase 일단 식3 방식으로 implement 해보기
-- [ ] gpu number 지정 옵션추가?
+- [x] `210216 done` Accuracy 측정 function 만들기 (for hyperparameter-tuning)
+- [x] ~~Base Graph Module화~~ -> 어차피 객체라서 굳이 안해도 될 것 같음
+- [ ] `ing` @hmcoo // feature set load file 
+- [ ] `tmrw` m update for incremental phase 일단 식3 방식으로 implement 해보기
+- [ ] `tmrw` gpu number 지정 옵션추가 시도해보기
 
 
 
