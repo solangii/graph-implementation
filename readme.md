@@ -10,9 +10,11 @@ Meta Continual learning을 위한 graph implemetation repository
 
 ## Todo
 
-20.02.14.Sun 작성
+20.02.16.화
 
-- [ ] GPU 연산으로 바꾸기  (+ z,c error 고치기)
+- [x] z, c, lambda error 
+
+- [x] GPU 연산으로 바꾸기  
 - [ ] Accuracy 측정 function 만들기 (for hyperparameter-tuning)
 - [ ] Base Graph Module화
 - [ ] @hmcoo // feature set load file 
@@ -22,6 +24,6 @@ Meta Continual learning을 위한 graph implemetation repository
 ## Directory tree
 
 - `📄 initial.py` :  **각종 hyper parameter** 설정 해둔 파일
-- `📄 NeuralGas.py   ` :  **Graph Model** 파일 (현재까지는 Neural Gas방식으로 base graph만 만듬)
+- `📄 Graph.py   ` :  **Graph Model** 파일 (현재까지는 Neural Gas방식으로 base graph만 만듬)
 - `📄 run_example.py` : 실행 파일
 

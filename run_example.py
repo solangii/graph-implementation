@@ -1,13 +1,19 @@
 #import neural gas model
-from NeuralGas import ng
+from Graph import ng
 
 #preparing data ...
 from initial import params
 import numpy as np
+import cupy as cp
 
-feature_set = np.random.rand(params['feature_nums'], params['feature_dim'])
-image_set = np.random.rand(params['feature_nums'])
-label_set = np.random.rand(params['feature_nums'])
+if params['gpu_nums'] >0:
+    xp = cp
+else:
+    xp = np
+
+feature_set = xp.random.rand(params['feature_nums'], params['feature_dim'])
+image_set = xp.random.rand(params['feature_nums'])
+label_set = xp.random.rand(params['feature_nums'])
 
 #fitting neural network ...
 BG = ng(feature_set, params['gpu_nums'], params['vertex_nums'],params['alpha'],params['eta'],params['max_iter'])

@@ -1,22 +1,24 @@
-import numpy as np
-from tqdm import tqdm
 import os
-from scipy.spatial import distance
-from numpy.linalg import norm
-from cupy.linalg import norm as norm_gpu
 
-#Todo gpu연산으로 바꾸고
+import numpy as np
+from cupy.linalg import norm as norm_gpu
+from numpy.linalg import norm
+#from scipy.spatial import distance
+from tqdm import tqdm
+
+
 #Todo ACCURACY 측정하는거 추가하고
 #Todo 중간 파라미터 저장할 수 있는
 
 #Todo 후에 Argument는 parser
 
 class Vertex():
-    def __init__(self, m):
+    def __init__(self, m, xp):
         self.c = None
         self.z = None
         self.l = None
         self.m = m
+        #self.f_idx = xp.empty((0))
         self.f_idx = []
 
 class ng:
@@ -29,17 +31,22 @@ class ng:
         self.eta = eta
         self.max_iter = max_iter
         self.anchor_set = self.init_anchor()
-        self.vertices = []
         self.gpu = gpu
+        self.vertices = []
 
         if self.gpu <0:
             self.xp = np
+            self.dist = norm
         else:
             import cupy as cp
             self.xp = cp
+            self.dist = norm_gpu
 
             os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
             os.environ["CUDA_VISIBLE_DEVICES"] = "%d" % self.gpu
+
+        #self.vertices = self.xp.empty(0)
+
 
     def init_anchor(self):
         """
@@ -59,9 +66,10 @@ class ng:
         Df = []
 
         for i in range(self.vertex_nums):
-            dis = distance.euclidean(feature, self.anchor_set[i])
+            dis = self.dist(feature - self.anchor_set[i])
             Df.append(dis)
-        Rf = np.argsort(Df)
+        Df = self.xp.array(Df)
+        Rf = self.xp.argsort(Df).tolist()
 
         return Rf
 
@@ -73,7 +81,7 @@ class ng:
         :param i: feature index in feature set
         :param anchor_index: anchor index in anchor set
         """
-        rate = self.eta * np.exp(-i/self.alpha)
+        rate = self.eta * self.xp.exp(-i/self.alpha)
         updated_anchor = anchor + rate *(feature - anchor)
         self.anchor_set[anchor_index] = updated_anchor
 
@@ -94,8 +102,9 @@ class ng:
         """
         make nodes(objects) with updated anchor(m)
         """
-        for i in range(self.vertex_nums):
-            self.vertices.append(Vertex(self.anchor_set[i]))
+        for i in tqdm(range(self.vertex_nums), desc="make vertex"):
+            self.vertices.append(Vertex(self.anchor_set[i], self.xp))
+
 
     def update_vertex(self, image_set, label_set):
         """
@@ -103,18 +112,19 @@ class ng:
         :param label_set:
         :return: vertex update
         """
+
         for i in range(self.feature_nums):
             nearest_m = self.compute_rank_order(self.feature_set[i])[0]
             self.vertices[nearest_m].f_idx.append(i)
 
-        for i in tqdm(range(self.vertex_nums), desc="making vertex : "):
+        for i in tqdm(range(self.vertex_nums), desc="update vertex"):
             f_set = []
             for j in range(len(self.vertices[i].f_idx)):
                 f_set.append(self.feature_set[self.vertices[i].f_idx[j]])
 
             f_set = self.xp.array(f_set)
 
-            ##예외처리, F_set이 비어있
+            ##exception
             if len(f_set)==0:
                 self.vertices[i].l = -1
                 self.vertices[i].z = -1
@@ -142,14 +152,19 @@ class ng:
         :return: 모든 Vertex에 대해서 가장 가까운 pseudo image와 label을 찾음
         """
         #dist = distance.euclidean(self.vertices[m_idx].m, f_set[0].T)
-        dist = norm(self.vertices[m_idx].m - f_set[0])
+
+        if self.xp is np:
+            comp = norm
+        else:
+            comp = norm_gpu
+
+        dist = comp(self.vertices[m_idx].m - f_set[0])
         idx = 0
         for i in range(1,len(f_set)):
-            if dist > norm(self.vertices[m_idx].m - f_set[i]):
-                dist = norm(self.vertices[m_idx].m - f_set[i])
+            if dist > comp(self.vertices[m_idx].m - f_set[i]):
+                dist = comp(self.vertices[m_idx].m - f_set[i])
                 idx = i
 
-        #real_idx = self.vertices[m_idx].f_set[idx]
         real_idx = self.vertices[m_idx].f_idx[idx]
 
         z = image_set[real_idx]
@@ -172,3 +187,5 @@ class ng:
         self.update_vertex(x,y)
         print("update vertex done!")
         print("============================================================")
+
+
