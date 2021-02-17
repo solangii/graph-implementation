@@ -25,6 +25,13 @@ test_label_set = xp.random.randint(0,params['class'], size=(params['feature_nums
 
 BG.compute_accuracy(test_feature_set, test_label_set)
 
+#incremental phase
+novel_feature_num = params['n_way']*params['k_shot']
+new_feature_set = xp.random.rand(novel_feature_num, params['feature_dim'])
+new_image_set = xp.random.rand(params['feature_nums'])
+new_label_set = xp.random.randint(params['class'],params['class']+params['n_way'], size=novel_feature_num)
+
+BG.update_graph(new_feature_set,params['n_way'],new_image_set, new_label_set)
 
 
 

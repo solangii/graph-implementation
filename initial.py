@@ -6,5 +6,7 @@ params = {'vertex_nums' : 400,
           'gpu_nums':5,
           'max_iter':100,
           'class' : 200,
-          'test_feature_nums' : 400
+          'test_feature_nums' : 400,
+          'n_way' : 5,
+          'k_shot' : 5
 }

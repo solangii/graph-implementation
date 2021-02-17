@@ -29,7 +29,7 @@ class ng:
         self.alpha = alpha
         self.eta = eta
         self.max_iter = max_iter
-        self.anchor_set = self.init_anchor()
+        self.anchor_set = self.init_anchor(self.feature_set, self.vertex_nums)
         self.gpu = gpu
         self.vertices = []
 
@@ -37,6 +37,7 @@ class ng:
             self.xp = np
             self.dist = norm
         else:
+            #ToDo GPU번호지정
             import cupy as cp
             self.xp = cp
             self.dist = norm_gpu
@@ -44,93 +45,89 @@ class ng:
             os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
             os.environ["CUDA_VISIBLE_DEVICES"] = "%d" % self.gpu
 
-        #self.vertices = self.xp.empty(0)
-
-
-    def init_anchor(self):
+    def init_anchor(self, f_set, v_num):
         """
         :return: initialize anchor that randomly chosen at feature set
         """
-        rand_idx = np.random.randint(self.feature_set.shape[0], size= self.vertex_nums)
-        anchor = self.feature_set[rand_idx, :]
-        print("initialize anchor done!")
-        return anchor
+        rand_idx = np.random.randint(f_set.shape[0], size= v_num)
+        anchor = f_set[rand_idx, :]
+        #print("initialize anchor done!")
+        return anchor #ndarray
 
-    def compute_rank_order(self, feature):
+    def compute_rank_order(self, feature, anchor_set):
         """
         compute distance with feature and m, and ordering it
         :param feature: each feature
+        :param anchor_set:
         :return: rank order index for feature
         """
         Df = []
 
-        for i in range(self.vertex_nums):
-            dis = self.dist(feature - self.anchor_set[i])
+        for i in range(anchor_set.shape[0]):
+            dis = self.dist(feature - anchor_set[i])
             Df.append(dis)
         Df = self.xp.array(Df)
         Rf = self.xp.argsort(Df).tolist()
 
-        return Rf
+        return Rf #list
 
-    def update_anchor(self, feature, anchor, i, anchor_index):
+    def update_anchor(self, feature, anchor, i):
         """
         update anchor(m) by equation3 in FSCIL.
         :param feature: each feature
         :param anchor: centroid
-        :param i: feature index in feature set
-        :param anchor_index: anchor index in anchor set
+        :param i: iterate number
+        :return updated anchor position
         """
         rate = self.eta * self.xp.exp(-i/self.alpha)
         updated_anchor = anchor + rate *(feature - anchor)
-        self.anchor_set[anchor_index] = updated_anchor
+        return updated_anchor #ndarray
 
-    def update_anchor_set(self):
-        """
-        update all anchor
-        """
-        for i in tqdm(range(self.feature_nums), desc="update anchor"):
-            f = self.feature_set[i]
-            Rf = self.compute_rank_order(f) #해당 feature와 가까운 순서대로 m의 index
+    def update_anchor_set(self, f_set, anchor_set):
 
-            for j in range(self.max_iter):
-                idx = Rf[j]
-                m = self.anchor_set[idx]
-                self.update_anchor(f,m,j,idx)
+        for f_idx in tqdm(range(f_set.shape[0]), desc="update anchor"):
+            f = f_set[f_idx]
+            Rf = self.compute_rank_order(f, anchor_set)
 
-    def make_vertex(self):
-        """
-        make nodes(objects) with updated anchor(m)
-        """
-        for i in tqdm(range(self.vertex_nums), desc="make vertex"):
-            self.vertices.append(Vertex(self.anchor_set[i], self.xp))
+            for i in range(self.max_iter):
+                #Todo 이거 max iter수가 100인데 inc에서는 m이 그만큼 안많아서 예외처리
+                if len(Rf) < self.max_iter:
+                    break
+                m_idx = Rf[i]
+                m = self.anchor_set[m_idx]
+                anchor_set[m_idx] = self.update_anchor(f,m,i)
 
+        return anchor_set #ndarray
 
-    def update_vertex(self, image_set, label_set):
-        """
-        :param image_set:
-        :param label_set:
-        :return: vertex update
-        """
+    def make_vertex(self, anchor_set, v_num):
+        vertices = []
+        for i in tqdm(range(v_num), desc="make vertex"):
+            #self.vertices.append(Vertex(self.anchor_set[i], self.xp))
+            vertices.append(Vertex(anchor_set[i], self.xp))
+        return vertices #list
 
-        for i in tqdm(range(self.feature_nums), desc="winner vector compute"):
-            nearest_m = self.compute_rank_order(self.feature_set[i])[0]
-            self.vertices[nearest_m].f_idx.append(i)
+    def update_vertex(self, image_set, label_set, vertices, f_set, anchor_set):
+        for i in tqdm(range(f_set.shape[0]), desc="winner vector compute"):
+            nearest_m = self.compute_rank_order(f_set[i],anchor_set)[0]
+            vertices[nearest_m].f_idx.append(i)
 
-        for i in tqdm(range(self.vertex_nums), desc="update vertex"):
-            f_set = []
-            for j in range(len(self.vertices[i].f_idx)):
-                f_set.append(self.feature_set[self.vertices[i].f_idx[j]])
+        for i in tqdm(range(len(vertices)), desc="update vertex"):
+            winner_set = []
+            for j in range(len(vertices[i].f_idx)):
+                winner_set.append(f_set[vertices[i].f_idx[j]])
 
-            f_set = self.xp.array(f_set)
+            winner_set = self.xp.array(winner_set)
 
-            ##exception
-            if len(f_set)==0:
-                self.vertices[i].l = -1
-                self.vertices[i].z = -1
-                self.vertices[i].c = -1
+            #ToDo exception
+            if len(winner_set)==0:
+                vertices[i].l = -1
+                vertices[i].z = -1
+                vertices[i].c = -1
             else:
-                self.vertices[i].l = self.compute_lambda(f_set)
-                self.vertices[i].z, self.vertices[i].c = self.compute_nearest(i, f_set, image_set, label_set)
+                vertices[i].l = self.compute_lambda(winner_set)
+                vertices[i].z, vertices[i].c = self.compute_nearest(i, winner_set, image_set, label_set, vertices)
+
+        return vertices
 
     def compute_lambda(self, f_set):
         """
@@ -140,31 +137,30 @@ class ng:
         cov = self.xp.cov(self.xp.transpose(f_set))
         var = self.xp.diag(cov)
         lam = self.xp.diag(var)
-        return lam
+        return lam #ndarray
 
-    def compute_nearest(self, m_idx, f_set, image_set, label_set):
+    def compute_nearest(self, m_idx, f_set, image_set, label_set, vertices):
         """
+        :param vertices:
         :param m_idx: vertex index
         :param f_set: nearest feature set
         :param image_set: image set
         :param label_set: label set
         :return: 모든 Vertex에 대해서 가장 가까운 pseudo image와 label을 찾음
         """
-        #dist = distance.euclidean(self.vertices[m_idx].m, f_set[0].T)
-
         if self.xp is np:
             comp = norm
         else:
             comp = norm_gpu
 
-        dist = comp(self.vertices[m_idx].m - f_set[0])
+        dist = comp(vertices[m_idx].m - f_set[0])
         idx = 0
         for i in range(1,len(f_set)):
-            if dist > comp(self.vertices[m_idx].m - f_set[i]):
-                dist = comp(self.vertices[m_idx].m - f_set[i])
+            if dist > comp(vertices[m_idx].m - f_set[i]):
+                dist = comp(vertices[m_idx].m - f_set[i])
                 idx = i
 
-        real_idx = self.vertices[m_idx].f_idx[idx]
+        real_idx = vertices[m_idx].f_idx[idx]
 
         z = image_set[real_idx]
         c = label_set[real_idx]
@@ -176,17 +172,16 @@ class ng:
         :param y: label-set for pretrain data set
         :return:
         """
-        self.update_anchor_set()
+        self.anchor_set = self.update_anchor_set(self.feature_set, self.anchor_set)
         print("anchor update done!")
         print("============================================================")
 
-        self.make_vertex()
+        self.vertices = self.make_vertex(self.anchor_set, self.vertex_nums)
         print("make vertex done!")
 
-        self.update_vertex(x,y)
+        self.vertices = self.update_vertex(x, y, self.vertices, self.feature_set, self.anchor_set)
         print("update vertex done!")
         print("============================================================")
-
 
     def compute_accuracy(self, f_set, label_set):
         """
@@ -221,4 +216,29 @@ class ng:
 
         print("the accuracy is %d percent" %success_rate)
 
+    def update_graph(self, f_set, class_num, image_set, label_set):
+        """
+        :param label_set:
+        :param image_set:
+        :param f_set: novel feature set in Sub-Epi (Query key)
+        :param class_num: class number = new vertex number
+        :return:
+        """
+        #novel anchor initialize
+        new_anchor_set = self.init_anchor(f_set, class_num)
 
+        #novel anchor update
+        new_anchor_set = self.update_anchor_set(f_set, new_anchor_set)
+
+        #make new vertex
+        vertices = self.make_vertex(new_anchor_set, class_num)
+
+        #update new vertex
+        vertices = self.update_vertex(image_set,label_set,vertices,f_set,new_anchor_set)
+
+        #update for graph
+
+        self.xp.concatenate((self.anchor_set, new_anchor_set), axis=0)
+        self.vertices.append(vertices)
+
+        print("update done (incremental sub-episode phase)")
