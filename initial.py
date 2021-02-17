@@ -1,5 +1,5 @@
-params = {'vertex_nums' : 400,
-          'feature_nums':500,
+params = {'vertex_nums' : 1200,
+          'feature_nums':30000,
           'feature_dim':512,
           'alpha':10,
           'eta':0.1,
