@@ -25,6 +25,6 @@ Meta Continual learning을 위한 graph implemetation repository
 ## Directory tree
 
 - `📄 initial.py` :  **각종 hyper parameter** 설정 해둔 파일
-- `📄 Graph.py   ` :  **Graph Model** 파일 (현재까지는 Neural Gas방식으로 base graph만 만듬)
+- `📄 Graph.py   ` :  **Graph Model** 파일 (NG, FSCIL방식으로 vertex update 수행. base graph 만들고, 같은 방식으로 incremental learnnig 수행. Edge는 학습에 이용되지 않아 구현하지 않음)
 - `📄 run_example.py` : 실행 파일
 
