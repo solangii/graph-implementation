@@ -5,6 +5,9 @@ from Graph import ng
 from initial import params
 import numpy as np
 import cupy as cp
+import ray
+
+ray.init()
 
 if params['gpu_nums'] >0:
     xp = cp
