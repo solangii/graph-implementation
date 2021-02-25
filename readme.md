@@ -15,17 +15,15 @@ Meta Continual learning을 위한 graph implemetation repository
 - [x] `210216 done` Accuracy 측정 function 만들기 (for hyperparameter-tuning)
 - [x] ~~Base Graph Module화~~ -> 어차피 객체라서 굳이 안해도 될 것 같음
 - [x] `210217 done` m update for incremental phase 일단 식3 방식으로 implement 해보기
-- [x] ~~`ing` gpu number 지정 옵션추가 시도해보기~~ ->어차피 메인코드에서 해결 ㄱㄴ
+- [x] ~~`ing` gpu number 0만 되는 현상~~ ->어차피 메인코드에서 해결 가능할 것 같아서 고치진 않을 듯
 - [x] `210225 done`  // feature set load file 
 - [ ] `ing` `ray` 사용해서 병렬처리
 - [ ] `ing` accuracy test -> 문제 발생..
-- [ ] hyper-parameter 튜닝 
-
-
+- [ ] hyper-parameter 튜닝
 
 ## Directory tree
 
 - `📄 initial.py` :  **각종 hyper parameter** 설정 해둔 파일
-- `📄 Graph.py   ` :  **Graph Model** 파일 (현재까지는 Neural Gas방식으로 base graph만 만듬)
+- `📄 Graph.py   ` :  **Graph Model** 파일 (NG, FSCIL방식으로 vertex update 수행. base graph 만들고, 같은 방식으로 incremental learnnig 수행. Edge는 학습에 이용되지 않아 구현하지 않음)
 - `📄 run_example.py` : 실행 파일
 
