@@ -5,19 +5,14 @@ from cupy.linalg import norm as norm_gpu
 from numpy.linalg import norm
 #from scipy.spatial import distance
 from tqdm import tqdm
-
-
-#Todo ACCURACY 측정하는거 추가하고
-#Todo 중간 파라미터 저장할 수 있는
 #Todo 후에 Argument는 parser
 
-class Vertex():
+class Vertex:
     def __init__(self, m, xp):
         self.c = None
         self.z = None
         self.l = None
         self.m = m
-        #self.f_idx = xp.empty((0))
         self.f_idx = []
 
 class ng:
@@ -47,7 +42,7 @@ class ng:
 
     def init_anchor(self, f_set, v_num):
         """
-        :return: initialize anchor that randomly chosen at feature set
+        :return: initialize anchor that randomly chosen at asset set
         """
         rand_idx = np.random.randint(f_set.shape[0], size= v_num)
         anchor = f_set[rand_idx, :]
@@ -56,10 +51,10 @@ class ng:
 
     def compute_rank_order(self, feature, anchor_set):
         """
-        compute distance with feature and m, and ordering it
+        compute distance with asset and m, and ordering it
         :param feature: each feature
         :param anchor_set:
-        :return: rank order index for feature
+        :return: rank order index for asset
         """
         Df = []
 
@@ -214,7 +209,8 @@ class ng:
 
         success_rate = float(success / len(f_set) )* 100
 
-        print("the accuracy is %d percent" %success_rate)
+        #print("the accuracy is %d percent" %success_rate)
+        return success_rate
 
     def update_graph(self, f_set, class_num, image_set, label_set):
         """
