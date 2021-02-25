@@ -202,9 +202,10 @@ class ng:
             for m_idx in range(1,self.vertex_nums):
                 if dist > comp(self.vertices[m_idx].m - f_set[i]):
                     dist = comp(self.vertices[m_idx].m - f_set[i])
-                    idx = i
+                    idx = m_idx
 
-            if idx == label_set[i]:
+            if self.vertices[idx].c == label_set[i]:
+            #if idx == label_set[i]:
                 success += 1
 
         success_rate = float(success / len(f_set) )* 100
@@ -238,3 +239,20 @@ class ng:
         self.vertices.append(vertices)
 
         print("update done (incremental sub-episode phase)")
+
+    def compute_accuracy_for_train(self, label_set):
+        success=0
+
+        for i in range(self.vertex_nums):
+            label = self.vertices[i].c
+            num = len(self.vertices[i].f_idx)
+            winner_set = self.vertices[i].f_idx
+            for k in range(num):
+                if label == label_set[winner_set[k]]:
+                    success +=1
+
+        success_rate = float(success / self.feature_nums) * 100
+        return success_rate
+
+
+

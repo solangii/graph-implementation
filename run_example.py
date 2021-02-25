@@ -33,8 +33,10 @@ image_set = image_load[idx][:]
 #fitting
 BG = ng(feature_set, params['gpu_nums'], params['vertex_nums'],params['alpha'],params['eta'],params['max_iter'])
 BG.pretrain(image_set, label_set)
+acc = BG.compute_accuracy_for_train(label_set)
+print(acc)
 
-
+"""
 #testing acc
 test_data = xp.load('/home/miil/Datasets/ContiMeta/pretrain_test.npz')
 t_feature_load = data['feature']
@@ -59,7 +61,7 @@ for i in range(10):
 
 
 print(acc)
-
+"""
 """
 feature_set = xp.random.rand(params['feature_nums'], params['feature_dim'])
 image_set = xp.random.rand(params['feature_nums'])
