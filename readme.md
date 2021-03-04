@@ -13,11 +13,9 @@ Meta Continual learning을 위한 graph implemetation repository
 - [x] `210216 done` z, c, lambda error 
 - [x] `210216 done` GPU 연산으로 바꾸기  
 - [x] `210216 done` Accuracy 측정 function 만들기 (for hyperparameter-tuning)
-- [x] ~~Base Graph Module화~~ -> 어차피 객체라서 굳이 안해도 될 것 같음
 - [x] `210217 done` m update for incremental phase 일단 식3 방식으로 implement 해보기
-- [x] ~~`ing` gpu number 0만 되는 현상~~ ->어차피 메인코드에서 해결 가능할 것 같아서 고치진 않을 듯
-- [x] `210225 done`  // feature set load file 
-- [x] `210225 done` accuracy test -> 문제 발생..
+- [x] `210225 done`  feature set load file 
+- [x] `210225 done` accuracy test error 해결
 - [ ] `ing` `ray` 사용해서 병렬처리
 - [ ] `ing` hyper-parameter 튜닝
 

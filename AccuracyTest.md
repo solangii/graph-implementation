@@ -22,3 +22,6 @@
 - alpha가 1일때 가장 accuracy가 좋음 -> 원인이 뭘지 생각중
 - feature #가 100,000일 때 보다 30,000일 때 더 좋음 -> 원인이 뭘지 생각중
 - 실험해봐야할 hyper parameter의 범위 값들을 어떻게 정해야 할 지 좋은 방안이 있을지 궁금
+
+- 정확도는 몇까지 나와야 base graph로 쓸 수 있을지도 궁금 -> issue 남겼는데 답이 없다..ㅠㅠㅠ
+  - ![image-20210304145205157](/Users/kimsolang/Library/Application Support/typora-user-images/image-20210304145205157.png)
