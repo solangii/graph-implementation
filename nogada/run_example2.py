@@ -8,7 +8,7 @@ import os
 if params['gpu_nums'] >0:
     xp = cp
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 else:
     xp = np
 

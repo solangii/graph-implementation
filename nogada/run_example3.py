@@ -1,5 +1,5 @@
 from Graph_eq3 import ng
-from init2 import params
+from init3 import params
 import numpy as np
 import cupy as cp
 import os
@@ -8,7 +8,7 @@ import os
 if params['gpu_nums'] >0:
     xp = cp
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 else:
     xp = np
 
