@@ -27,7 +27,7 @@ Meta Continual learning을 위한 graph implemetation repository
 
 
 
-## Accuracy Test
+## Accuracy Test - (alpha, eta setting)
 
 |  #   | feature # | vertex # | alpha |    eta    | max_iter |   Train    |  Test  |
 | :--: | :-------: | :------: | :---: | :-------: | :------: | :--------: | :----: |
@@ -46,3 +46,26 @@ Meta Continual learning을 위한 graph implemetation repository
 |  13  |   30000   |   1200   |   5   | **0.075** |   1000   |   60.36%   | 57.63% |
 |  14  |   30000   |   1200   |   5   |     1     |   1000   |   35.11%   | 33.43% |
 |  15  |   30000   |   1200   | **1** | **0.075** |   1000   |   59.5%    | 55.58% |
+
+
+
+## Accuracy Test - (lambda, epsilon setting)
+
+|  #   | feature # | vertex # | lambda i | lambda f | epsilon i | epsilon f | max_iter | Train | Test  |
+| :--: | :-------: | :------: | :------: | :------: | :-------: | :-------: | :------: | :---: | :---: |
+|  1   |   30000   |   1200   |    10    |   0.01   |    0.1    |   0.005   |   1000   | 56.99 | 56.53 |
+|  2   |   30000   |   1200   |    1     |          |           |           |          |       |       |
+|  3   |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+|      |           |          |          |          |           |           |          |       |       |
+

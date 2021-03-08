@@ -1,4 +1,4 @@
-from Graph_change_eq3 import ng
+from Graph_Ray2 import ng
 from init import params
 import numpy as np
 import cupy as cp
@@ -8,12 +8,12 @@ import ray
 #from ray import tune
 
 
-#ray.init(num_cpus=20, num_gpus=7,ignore_reinit_error=True)
+ray.init(num_cpus=20, num_gpus=3,ignore_reinit_error=True)
 
 if params['gpu_nums'] >0:
     xp = cp
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3,4"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,5,6"
 #    ray.get(gpu_method.remote())
 else:
     xp = np
@@ -33,14 +33,14 @@ image_set = image_load[idx][:]
 
 
 #fitting
-BG = ng(feature_set, params['gpu_nums'], params['vertex_nums'])
-BG.pretrain(image_set, label_set)
+BG = ng.remote(feature_set, params['gpu_nums'], params['vertex_nums'])
+ray.get(BG.pretrain.remote(image_set, label_set))
 
-acc_train = BG.compute_accuracy_for_train(label_set)
+acc_train = ray.get(BG.compute_accuracy_for_train.remote(label_set))
 print("train avg :", acc_train)
 
 
-
+"""
 #testing acc
 test_data = xp.load('/home/miil/Datasets/ContiMeta/pretrain_test.npz')
 t_feature_load = data['feature']
@@ -60,7 +60,7 @@ for i in range(10):
 
 acc = np.array(acc)
 avg = np.mean(acc)
-print("test avg :", avg)
+print("test avg :", avg)"""
 
 """
 feature_set = xp.random.rand(params['feature_nums'], params['feature_dim'])
