@@ -38,6 +38,14 @@ Meta Continual learning을 위한 graph implemetation repository
 
 ## Accuracy Test - (alpha, eta setting)
 
+`nogada/run_example.py` 과 `nogada/init.py` 의 순서를 잘 맞춰서, `init.py`  파일의 config 셋팅만 각각 변경해준 뒤 순서에 맞게 아래 코드 실행하면 됨
+
+`nohup python run_example.py > result.out &`
+
+이후 결과 확인은 `cat result.out`
+
+
+
 ### FSCIL adaptation
 
 $$
