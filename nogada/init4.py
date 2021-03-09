@@ -10,7 +10,7 @@ params = {'vertex_nums' : 1200,
           'n_way' : 5,
           'k_shot' : 5,
           'lambda_i':10,
-          'lambda_f':0.001,
-          'epsilon_i':0.1,
+          'lambda_f':0.01,
+          'epsilon_i':10,
           'epsilon_f':0.005
 }
